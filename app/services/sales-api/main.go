@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/ardanlabs/service/foundation/logger"
 	"go.uber.org/zap"
@@ -24,5 +25,7 @@ func main() {
 }
 
 func run(log *zap.SugaredLogger) error {
+	// Set how many cores Go can use in GoRoutines
+	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 	return nil
 }
