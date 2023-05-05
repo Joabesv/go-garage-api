@@ -26,6 +26,8 @@ func main() {
 	}
 }
 
+var build = "develop"
+
 func run(log *zap.SugaredLogger) error {
 	// Set how many cores Go can use in GoRoutines
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
