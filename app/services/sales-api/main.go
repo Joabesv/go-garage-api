@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	"github.com/ardanlabs/service/foundation/logger"
 	"go.uber.org/zap"
@@ -27,5 +29,11 @@ func main() {
 func run(log *zap.SugaredLogger) error {
 	// Set how many cores Go can use in GoRoutines
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	defer log.Infow("Shutdown")
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+	<-shutdown
+
 	return nil
 }
