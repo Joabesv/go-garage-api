@@ -51,3 +51,5 @@ dev-apply:
 	kubectl wait pods --namespace=sales-system --selector app=sales --for=condition=Ready
 dev-restart:
 	kubectl rollout restart deployment sales --namespace=sales-system
+dev-logs:
+	kubectl logs --namespace=sales-system -l app=sales --all-containers=true -f --tail=100 --max-log-requests=6

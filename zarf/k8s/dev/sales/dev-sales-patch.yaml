@@ -10,10 +10,10 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
-template:
-  metadata:
+  template:
+   metadata:
     labels:
       app: sales
-  spec: 
+   spec: 
     dnsPolicy: ClusterFirstWithHostNet
     hostNetwork: true
