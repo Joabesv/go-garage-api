@@ -65,4 +65,4 @@ dev-describe-sales:
 
 dev-update: all dev-load dev-restart
 
-dev-upate-apply: all dev-load dev-apply
+dev-update-apply: all dev-load dev-apply

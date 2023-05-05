@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/ardanlabs/service/foundation/logger"
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +30,11 @@ func main() {
 var build = "develop"
 
 func run(log *zap.SugaredLogger) error {
+
+	opt := maxprocs.Logger(log.Infof)
+	if _, err := maxprocs.Set(opt); err != nil {
+		return fmt.Errorf("maxprocs: %w", err)
+	}
 	// Set how many cores Go can use in GoRoutines
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 	defer log.Infow("Shutdown")
