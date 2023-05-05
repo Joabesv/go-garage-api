@@ -38,3 +38,8 @@ dev-up-local:
 	# tells cluster to wait
 
 	kubectl wait --timeout=120s --namespace=local-path-storage --for=condition=Available deployment/local-path-provisioner
+
+dev-status:
+	kubectl get nodes -o wide
+	kubectl get svc -o wide
+	kubectl get pods -o wide --watch --all-namespaces
