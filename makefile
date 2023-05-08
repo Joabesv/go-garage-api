@@ -1,6 +1,9 @@
 SHELL := /bin/bash
 
 run:
+	go run app/services/sales-api/main.go | go run app/tooling/logfmt/main.go -service=
+
+run-help:
 	go run app/services/sales-api/main.go --help
 
 tidy:
@@ -52,7 +55,7 @@ dev-apply:
 dev-restart:
 	kubectl rollout restart deployment sales --namespace=sales-system
 dev-logs:
-	kubectl logs --namespace=sales-system -l app=sales --all-containers=true -f --tail=100 --max-log-requests=6
+	kubectl logs --namespace=sales-system -l app=sales --all-containers=true -f --tail=100 --max-log-requests=6 | go run app/tooling/logfmt/main.go -service=
 dev-describe:
 	kubectl describe nodes
 	kubectl describe svc

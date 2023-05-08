@@ -34,15 +34,17 @@ var build = "develop"
 
 func run(log *zap.SugaredLogger) error {
 
+	// Setup logger
 	opt := maxprocs.Logger(log.Infof)
 	if _, err := maxprocs.Set(opt); err != nil {
 		return fmt.Errorf("maxprocs: %w", err)
 	}
+
 	// Set how many cores Go can use in GoRoutines
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 	defer log.Infow("Shutdown")
 
-	// Configuration
+	// Configuration - Setup dev env
 	cfg := struct {
 		conf.Version
 		Web struct {
@@ -69,6 +71,17 @@ func run(log *zap.SugaredLogger) error {
 		}
 		return fmt.Errorf("parsing config: %w", err)
 	}
+
+	// Startup app
+	log.Infow("starting service", "version", build)
+	defer log.Infow("shutdown complete")
+
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return fmt.Errorf("generating config for output %w", err)
+	}
+
+	log.Infow("startup", "config", out)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
