@@ -3,8 +3,8 @@
 # Other commands to install.
 # go install github.com/divan/expvarmon@latest
 #
-# http://sales-service.sales-system.svc.cluster.local:4000/debug/pprof
-# http://sales-service.sales-system.svc.cluster.local:3000/test
+# curl -il http://sales-service.sales-system.svc.cluster.local:4000/debug/pprof
+# curl -il http://sales-service.sales-system.svc.cluster.local:3000/test
 
 run:
 	go run app/services/sales-api/main.go | go run app/tooling/logfmt/main.go
@@ -87,7 +87,7 @@ dev-restart:
 	kubectl rollout restart deployment sales --namespace=sales-system
 
 dev-logs:
-	kubectl logs --namespace=sales-system -l app=sales --all-containers=true -f --tail=100 --max-log-requests=6 | go run app/tooling/logfmt/main.go -service=
+	kubectl logs --namespace=sales-system -l app=sales --all-containers=true -f --tail=100 --max-log-requests=6 | go run app/tooling/logfmt/main.go -service=SALES-API
 
 dev-describe:
 	kubectl describe nodes

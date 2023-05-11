@@ -19,6 +19,12 @@ import (
 	"go.uber.org/zap"
 )
 
+/*
+	Need to figure out timeouts for http service.
+*/
+
+var build = "develop"
+
 func main() {
 	log, err := logger.New("SALES-API")
 	if err != nil {
@@ -28,27 +34,27 @@ func main() {
 	defer log.Sync()
 
 	if err := run(log); err != nil {
-		log.Errorw("startup", "ERROR", nil)
+		log.Errorw("startup", "ERROR", err)
 		log.Sync()
 		os.Exit(1)
 	}
 }
 
-var build = "develop"
-
 func run(log *zap.SugaredLogger) error {
 
-	// Setup logger
+	// =========================================================================
+	// GOMAXPROCS
+
 	opt := maxprocs.Logger(log.Infof)
 	if _, err := maxprocs.Set(opt); err != nil {
 		return fmt.Errorf("maxprocs: %w", err)
 	}
-
-	// Set how many cores Go can use in GoRoutines
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
-	defer log.Infow("Shutdown")
+	defer log.Infow("shutdown")
 
-	// Configuration - Setup dev env
+	// =========================================================================
+	// Configuration
+
 	cfg := struct {
 		conf.Version
 		Web struct {
@@ -62,7 +68,7 @@ func run(log *zap.SugaredLogger) error {
 	}{
 		Version: conf.Version{
 			Build: build,
-			Desc:  "coyright information here",
+			Desc:  "copyright information here",
 		},
 	}
 
@@ -76,18 +82,20 @@ func run(log *zap.SugaredLogger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-	// Startup app
+	// =========================================================================
+	// App Starting
+
 	log.Infow("starting service", "version", build)
 	defer log.Infow("shutdown complete")
 
 	out, err := conf.String(&cfg)
 	if err != nil {
-		return fmt.Errorf("generating config for output %w", err)
+		return fmt.Errorf("generating config for output: %w", err)
 	}
-
 	log.Infow("startup", "config", out)
 
-	// Debugging
+	// =========================================================================
+	// Start Debug Service
 
 	log.Infow("startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
 
@@ -97,12 +105,12 @@ func run(log *zap.SugaredLogger) error {
 		}
 	}()
 
-	// START API
-	log.Infow("startup", "status", "start api V1")
+	// =========================================================================
+	// Start API Service
+
+	log.Infow("startup", "status", "initializing V1 API support")
 
 	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-	<-shutdown
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	apiMux := handlers.APIMux(handlers.APIMuxConfig{
@@ -126,9 +134,12 @@ func run(log *zap.SugaredLogger) error {
 		serverErrors <- api.ListenAndServe()
 	}()
 
+	// =========================================================================
+	// Shutdown
+
 	select {
 	case err := <-serverErrors:
-		return fmt.Errorf("server error %w", err)
+		return fmt.Errorf("server error: %w", err)
 
 	case sig := <-shutdown:
 		log.Infow("shutdown", "status", "shutdown started", "signal", sig)
@@ -139,7 +150,7 @@ func run(log *zap.SugaredLogger) error {
 
 		if err := api.Shutdown(ctx); err != nil {
 			api.Close()
-			return fmt.Errorf("could not stop graceffuly: %w", err)
+			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}
 
