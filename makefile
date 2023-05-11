@@ -6,6 +6,9 @@
 # curl -il http://sales-service.sales-system.svc.cluster.local:4000/debug/pprof
 # curl -il http://sales-service.sales-system.svc.cluster.local:3000/test
 
+status:
+	curl -il sales-service.sales-system.svc.cluster.local:3000/status
+
 run:
 	go run app/services/sales-api/main.go | go run app/tooling/logfmt/main.go
 
@@ -98,6 +101,9 @@ dev-describe-deployment:
 
 dev-describe-sales:
 	kubectl describe pod --namespace=sales-system -l app=sales
+
+dev-describe-tel:
+	kubectl describe pod --namespace=ambassador -l app=traffic-manager
 
 dev-update: all dev-load dev-restart
 
