@@ -52,6 +52,17 @@ ZIPKIN       := openzipkin/zipkin:2.24
 TELEPRESENCE := docker.io/datawire/tel2:2.13.1
 
 KIND_CLUSTER := ardan-starter-cluster
+
+
+dev-docker:
+	docker pull $(GOLANG)
+	docker pull $(ALPINE)
+	docker pull $(KIND)
+	docker pull $(POSTGRES)
+	docker pull $(VAULT)
+	docker pull $(ZIPKIN)
+	docker pull $(TELEPRESENCE) 
+
 dev-tel:
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
 	telepresence --context=kind-$(KIND_CLUSTER) helm install
