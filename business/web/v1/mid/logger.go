@@ -19,4 +19,5 @@ func Logger(log *zap.SugaredLogger) web.Middleware {
 		return h
 	}
 	return m
+
 }

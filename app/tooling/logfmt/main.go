@@ -49,9 +49,9 @@ func main() {
 		// I want them in.
 		b.Reset()
 		b.WriteString(fmt.Sprintf("%s: %s: %s: %s: %s: %s: ",
+			m["level"],
 			m["service"],
 			m["ts"],
-			m["level"],
 			traceID,
 			m["caller"],
 			m["msg"],
