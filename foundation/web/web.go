@@ -3,8 +3,10 @@ package web
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
+	"syscall"
 
 	"github.com/dimfeld/httptreemux/v5"
 )
@@ -30,6 +32,10 @@ func NewApp(shutdown chan os.Signal, mv ...Middleware) *App {
 	}
 }
 
+func (a *App) SignalShutdown() {
+	a.shutdown <- syscall.SIGTERM
+}
+
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
 func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
@@ -38,9 +44,22 @@ func (a *App) Handle(method string, path string, handler Handler, mw ...Middlewa
 
 	h := func(w http.ResponseWriter, r *http.Request) {
 		if err := handler(r.Context(), w, r); err != nil {
-			return
+			if validateShutdown(err) {
+				a.SignalShutdown()
+				return
+			}
 		}
 	}
 
 	a.ContextMux.Handle(method, path, h)
+}
+
+func validateShutdown(err error) bool {
+	switch {
+	case errors.Is(err, syscall.EPIPE):
+		return false
+	case errors.Is(err, syscall.ECONNRESET):
+		return false
+	}
+	return true
 }
